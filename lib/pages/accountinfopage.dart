@@ -149,10 +149,9 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.home_rounded),
-              title: const Text('Home'),
-              onTap: () =>
-                  Navigator.pushReplacementNamed(context, route.homePage),
+              leading: const Icon(Icons.directions_car_rounded),
+              title: const Text('Car Washes'),
+              onTap: () => Navigator.pushNamed(context, route.homePage),
             ),
             ListTile(
               leading: const Icon(Icons.settings_rounded),
