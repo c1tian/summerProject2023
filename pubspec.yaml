@@ -45,6 +45,9 @@ dependencies:
   provider: ^6.0.5
   intl: ^0.17.0
   google_maps_flutter: ^2.2.0
+  geocoding: ^2.0.0
+  permission_handler: ^10.2.0
+  geolocator: ^7.6.2
 
 
 dev_dependencies:
