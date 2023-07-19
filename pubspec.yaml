@@ -48,6 +48,9 @@ dependencies:
   geocoding: ^2.0.0
   permission_handler: ^10.2.0
   geolocator: ^7.6.2
+  http: ^0.13.3
+  google_maps_webservice: ^0.0.19
+  geodesy: ^0.3.2
 
 
 dev_dependencies:

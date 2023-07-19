@@ -7,6 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:geocoding/geocoding.dart'
     show locationFromAddress, Location, NoResultFoundException;
 
@@ -25,7 +27,105 @@ class _HomePageState extends State<HomePage> {
   static const LatLng _center = LatLng(61.9241, 25.7482); // Center of Finland
   static const double _zoom = 6.0; // Initial zoom level
   final TextEditingController _searchController = TextEditingController();
-  late Box<double> _locationBox;
+  final Set<Marker> _markers = {};
+  Set<Marker> _previousMarkers = {};
+
+  static final LatLngBounds _finlandBounds = LatLngBounds(
+    southwest: const LatLng(59.5, 19.0),
+    northeast: const LatLng(70.1, 32.0),
+  );
+
+  void _showCarWashDetails(dynamic carWashData) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(carWashData['name']),
+          content: Text(carWashData['formatted_address']),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _getCurrentLocation({String? location}) async {
+    if (location != null) {
+      // Fetch car washes at the specified location
+      _getCarWashes(location);
+    } else {
+      // Fetch car washes at the user's current location
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      final latitude = position.latitude;
+      final longitude = position.longitude;
+
+      final userLocation = '$latitude,$longitude';
+      _getCarWashes(userLocation);
+    }
+  }
+
+  void _getCarWashes(String location) async {
+    const String baseUrl =
+        'https://maps.googleapis.com/maps/api/place/textsearch/json';
+    const String apiKey = 'AIzaSyA76Y-B6E49EVTQak85ygZuEKESUTTu_ts';
+    List<String> query = [
+      'car+washes+in+$location',
+      'autopesula+in+$location',
+      'autopesu+in+$location',
+    ];
+    final String url = '$baseUrl?query=$query&key=$apiKey';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final decodedResponse = json.decode(response.body);
+      final results = decodedResponse['results'];
+
+      setState(() {
+        _previousMarkers = Set<Marker>.from(_markers);
+        _markers.clear();
+      });
+
+      for (var result in results) {
+        final location = result['geometry']['location'];
+        final lat = location['lat'];
+        final lng = location['lng'];
+
+        Marker marker = Marker(
+          markerId: MarkerId(result['place_id']),
+          position: LatLng(lat, lng),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
+          infoWindow: InfoWindow(
+            title: result['name'],
+            snippet: result['formatted_address'],
+            onTap: () {
+              _showCarWashDetails(result);
+            },
+          ),
+        );
+
+        setState(() {
+          _markers.add(marker);
+        });
+      }
+
+      setState(() {
+        _previousMarkers.clear();
+      });
+    } else {
+      print('Error finding car wash locations: ${response.statusCode}');
+    }
+  }
 
   @override
   void dispose() {
@@ -37,7 +137,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     requestLocationPermission(); // Request location permission when the app is launched
-    openLocationBox(); // Open the Hive box for user location
     email = FirebaseAuth.instance.currentUser?.email;
     print(FirebaseAuth.instance.currentUser?.email);
     showText = _userInfo.get('showText', defaultValue: true);
@@ -100,9 +199,12 @@ class _HomePageState extends State<HomePage> {
               target: _center,
               zoom: _zoom,
             ),
-            myLocationButtonEnabled: false,
+            myLocationButtonEnabled: true,
             mapType: MapType.normal,
             minMaxZoomPreference: const MinMaxZoomPreference(5.0, 20.0),
+            markers: _markers,
+            // Add the bounds restriction to limit the map to Finland
+            cameraTargetBounds: CameraTargetBounds(_finlandBounds),
           ),
           Padding(
             padding:
@@ -158,11 +260,13 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _mapController = controller; // Assign the controller to _mapController
     });
-  }
 
-  Future<void> openLocationBox() async {
-    await Hive.openBox<double>('userLocation');
-    _locationBox = Hive.box<double>('userLocation');
+    String? searchQuery = _searchController.text.trim();
+    if (searchQuery.isNotEmpty) {
+      _getCurrentLocation(location: searchQuery);
+    } else {
+      _getCurrentLocation();
+    }
   }
 
   Future<void> requestLocationPermission() async {
@@ -171,33 +275,15 @@ class _HomePageState extends State<HomePage> {
 
     if (permissionStatus.isGranted) {
       // Permission has been granted
-      locateUser(); // Automatically locate the user
+      _getCurrentLocation(); // Automatically locate the user
     } else if (permissionStatus.isPermanentlyDenied) {
       // Permission has been permanently denied
       openAppSettings(); // Redirect to app settings to enable the permission manually
     }
   }
 
-  void locateUser() async {
-    Position? position = await Geolocator.getCurrentPosition();
-
-    if (position != null) {
-      double lat = position.latitude;
-      double lng = position.longitude;
-
-      _locationBox.put('latitude', lat); // Save latitude to Hive
-      _locationBox.put('longitude', lng); // Save longitude to Hive
-
-      _mapController?.animateCamera(
-        CameraUpdate.newLatLngZoom(
-            LatLng(lat, lng), 12.0), // Zoom in to the user's location
-      );
-    }
-  }
-
   void searchPlace(String query) async {
     if (query.trim().isEmpty || query == "null") {
-      // Display warning notification for empty or null search query
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -218,16 +304,38 @@ class _HomePageState extends State<HomePage> {
         double lat = firstResult.latitude;
         double lng = firstResult.longitude;
 
+        if (!_finlandBounds.contains(LatLng(lat, lng))) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Out of range (Limited area Finland)",
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
         _mapController?.animateCamera(
           CameraUpdate.newLatLngZoom(
             LatLng(lat, lng),
             12.0,
           ),
         );
+
+        setState(() {
+          _markers.clear(); // Clear the markers set
+        });
+
+        _getCarWashes(query); // Fetch car washes at the searched location
+
+        setState(() {
+          _previousMarkers.clear(); // Clear the previous markers set
+        });
       }
     } catch (e) {
       if (e is NoResultFoundException) {
-        // Display warning notification for non-existent location
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
