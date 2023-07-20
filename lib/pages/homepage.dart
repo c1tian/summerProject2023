@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../utility/router.dart' as route;
@@ -35,21 +36,149 @@ class _HomePageState extends State<HomePage> {
     northeast: const LatLng(70.1, 32.0),
   );
 
-  void _showCarWashDetails(dynamic carWashData) {
+  void saveCarWashes(
+    String name,
+    String details,
+    String prices,
+    String discounts,
+  ) async {
+    // Concatenate the prices and discounts with commas
+    String formattedPrices = prices.split('\n').join(',');
+    String formattedDiscounts = discounts.split('\n').join(',');
+
+    try {
+      // Check if the car wash data already exists for the user
+      final carWashDocRef =
+          FirebaseFirestore.instance.collection('CarWashes').doc(name);
+
+      if (await carWashDocRef.get().then((doc) => doc.exists)) {
+        // Car wash data already exists, update the document only if the values are not null
+        Map<String, dynamic> updateData = {};
+        if (details.isNotEmpty) updateData['Details'] = details;
+        if (formattedPrices.isNotEmpty) updateData['Prices'] = formattedPrices;
+        if (formattedDiscounts.isNotEmpty)
+          updateData['Discounts'] = formattedDiscounts;
+
+        if (updateData.isNotEmpty) {
+          await carWashDocRef.update(updateData);
+          print('Car wash data has updated.');
+        } else {
+          print('No new data has updated.');
+        }
+      } else {
+        // If car wash data does not exist, add a new document
+        await carWashDocRef.set({
+          'Name': name,
+          'Details': details,
+          'Prices': formattedPrices,
+          'Discounts': formattedDiscounts,
+        });
+        print('New car wash data has added.');
+      }
+    } catch (e) {
+      print('Error saving car wash data: $e');
+    }
+  }
+
+  void _showCarWashDetails(dynamic carWashData) async {
+    // Fetch the car wash data from Firestore using the 'name' parameter
+    final carWashDocRef = FirebaseFirestore.instance
+        .collection('CarWashes')
+        .doc(carWashData['name']);
+    final carWashSnapshot = await carWashDocRef.get();
+    final carWashFirestoreData = carWashSnapshot.data();
+
+    TextEditingController pricesController = TextEditingController();
+    TextEditingController discountsController = TextEditingController();
+
+    // Initialize the controllers with the existing values or empty strings
+    pricesController.text = carWashFirestoreData?['Prices'] ?? '';
+    discountsController.text = carWashFirestoreData?['Discounts'] ?? '';
+
+    // Initialize the controllers with the existing values or empty strings
+    pricesController.text =
+        carWashFirestoreData?['Prices']?.replaceAll(',', '\n') ?? '';
+    discountsController.text =
+        carWashFirestoreData?['Discounts']?.replaceAll(',', '\n') ?? '';
+
+    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(carWashData['name']),
-          content: Text(carWashData['formatted_address']),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(carWashData['name']),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Details:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(carWashData['formatted_address']),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Prices:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: pricesController,
+                    maxLines: null, // Allow multiple lines of text
+                    decoration: const InputDecoration(
+                      hintText: 'Enter prices here. Example:\nHarjapesu 15e\n',
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Discounts:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: discountsController,
+                    maxLines: null, // Allow multiple lines of text
+                    decoration: const InputDecoration(
+                      hintText: 'Enter discounts here. Example:\nDiscount A 5%',
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Close'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Save car wash data to Firestore
+                    saveCarWashes(
+                      carWashData['name'],
+                      carWashData['formatted_address'],
+                      pricesController.text,
+                      discountsController.text,
+                    );
+
+                    // Show a success message to the user (you can customize this part)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Car wash data saved.'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -72,7 +201,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _getCarWashes(String location) async {
+  void _getCarWashes(
+    String location,
+  ) async {
     const String baseUrl =
         'https://maps.googleapis.com/maps/api/place/textsearch/json';
     const String apiKey = 'AIzaSyA76Y-B6E49EVTQak85ygZuEKESUTTu_ts';
@@ -100,17 +231,20 @@ class _HomePageState extends State<HomePage> {
         final lng = location['lng'];
 
         Marker marker = Marker(
+          onTap: () {
+            _showCarWashDetails(result);
+            // Save car wash data to Firestore automatically when the marker is tapped
+            saveCarWashes(
+              result['name'],
+              result['formatted_address'],
+              '', // Leave these empty so the user can add values later
+              '', // Leave these empty so the user can add values later
+            );
+          },
           markerId: MarkerId(result['place_id']),
           position: LatLng(lat, lng),
           icon: BitmapDescriptor.defaultMarkerWithHue(
             BitmapDescriptor.hueAzure,
-          ),
-          infoWindow: InfoWindow(
-            title: result['name'],
-            snippet: result['formatted_address'],
-            onTap: () {
-              _showCarWashDetails(result);
-            },
           ),
         );
 
