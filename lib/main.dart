@@ -11,6 +11,7 @@ import 'package:wheretowash/utility/router.dart' as route;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await Firebase.initializeApp();
   await Hive.initFlutter();
   await Hive.openBox('userData');
   runApp(const MyApp());

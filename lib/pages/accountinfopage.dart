@@ -178,8 +178,8 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
             child: Column(
               children: [
                 const SizedBox(height: 80),
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.account_circle_rounded),
                     Text('Name:'),
                   ],
@@ -198,8 +198,8 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ],
                 ),
                 const SizedBox(height: 50),
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.add_ic_call_rounded),
                     Text('Mobile:'),
                   ],
@@ -218,8 +218,8 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ],
                 ),
                 const SizedBox(height: 50),
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.attach_email_rounded),
                     Text('Email:'),
                   ],
@@ -239,8 +239,8 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   thickness: 1,
                 ),
                 const SizedBox(height: 50),
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.add_home_rounded),
                     Text('Address:'),
                   ],
@@ -260,8 +260,8 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ],
                 ),
                 const SizedBox(height: 50),
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.add_moderator_rounded),
                     Text('Password:'),
                   ],

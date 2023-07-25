@@ -39,10 +39,12 @@ class _HomePageState extends State<HomePage> {
   void saveCarWashes(
     String name,
     String details,
+    String openHours,
     String prices,
     String discounts,
   ) async {
     // Concatenate the prices and discounts with commas
+    String formattedHours = openHours.split('\n').join(',');
     String formattedPrices = prices.split('\n').join(',');
     String formattedDiscounts = discounts.split('\n').join(',');
 
@@ -55,9 +57,11 @@ class _HomePageState extends State<HomePage> {
         // Car wash data already exists, update the document only if the values are not null
         Map<String, dynamic> updateData = {};
         if (details.isNotEmpty) updateData['Details'] = details;
+        if (formattedHours.isNotEmpty) updateData['OpenHours'] = formattedHours;
         if (formattedPrices.isNotEmpty) updateData['Prices'] = formattedPrices;
-        if (formattedDiscounts.isNotEmpty)
+        if (formattedDiscounts.isNotEmpty) {
           updateData['Discounts'] = formattedDiscounts;
+        }
 
         if (updateData.isNotEmpty) {
           await carWashDocRef.update(updateData);
@@ -70,6 +74,7 @@ class _HomePageState extends State<HomePage> {
         await carWashDocRef.set({
           'Name': name,
           'Details': details,
+          'OpenHours': openHours,
           'Prices': formattedPrices,
           'Discounts': formattedDiscounts,
         });
@@ -88,14 +93,18 @@ class _HomePageState extends State<HomePage> {
     final carWashSnapshot = await carWashDocRef.get();
     final carWashFirestoreData = carWashSnapshot.data();
 
+    TextEditingController openHoursController = TextEditingController();
     TextEditingController pricesController = TextEditingController();
     TextEditingController discountsController = TextEditingController();
 
     // Initialize the controllers with the existing values or empty strings
     pricesController.text = carWashFirestoreData?['Prices'] ?? '';
     discountsController.text = carWashFirestoreData?['Discounts'] ?? '';
+    openHoursController.text = carWashFirestoreData?['OpenHours'] ?? '';
 
     // Initialize the controllers with the existing values or empty strings
+    openHoursController.text =
+        carWashFirestoreData?['OpenHours']?.replaceAll(',', '\n') ?? '';
     pricesController.text =
         carWashFirestoreData?['Prices']?.replaceAll(',', '\n') ?? '';
     discountsController.text =
@@ -109,43 +118,61 @@ class _HomePageState extends State<HomePage> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text(carWashData['name']),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Details:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(carWashData['formatted_address']),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'Prices:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: pricesController,
-                    maxLines: null, // Allow multiple lines of text
-                    decoration: const InputDecoration(
-                      hintText: 'Enter prices here. Example:\nHarjapesu 15e\n',
+              content: SingleChildScrollView(
+                // Wrap the Column with SingleChildScrollView
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Details:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'Discounts:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: discountsController,
-                    maxLines: null, // Allow multiple lines of text
-                    decoration: const InputDecoration(
-                      hintText: 'Enter discounts here. Example:\nDiscount A 5%',
+                    const SizedBox(height: 5),
+                    Text(carWashData['formatted_address']),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Opening hours:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: openHoursController,
+                      maxLines: null, // Allow multiple lines of text
+                      decoration: const InputDecoration(
+                        hintText:
+                            'Enter opening hours here. Example:\nMA-PE 7-20\nLA-SU 10-18',
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Prices:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: pricesController,
+                      maxLines: null, // Allow multiple lines of text
+                      decoration: const InputDecoration(
+                        hintText: 'Enter prices here. Example:\nHarjapesu 15e',
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Discounts:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: discountsController,
+                      maxLines: null, // Allow multiple lines of text
+                      decoration: const InputDecoration(
+                        hintText:
+                            'Enter discounts here. Example:\nDiscount A -5%',
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -160,6 +187,7 @@ class _HomePageState extends State<HomePage> {
                     saveCarWashes(
                       carWashData['name'],
                       carWashData['formatted_address'],
+                      openHoursController.text,
                       pricesController.text,
                       discountsController.text,
                     );
@@ -237,6 +265,7 @@ class _HomePageState extends State<HomePage> {
             saveCarWashes(
               result['name'],
               result['formatted_address'],
+              '', // Leave these empty so the user can add values later
               '', // Leave these empty so the user can add values later
               '', // Leave these empty so the user can add values later
             );
@@ -379,7 +408,7 @@ class _HomePageState extends State<HomePage> {
                 if (showText) // Added condition to show the welcome text
                   Text(
                     'Welcome back, $email',
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
               ],
