@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../utility/router.dart' as route;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -21,6 +20,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int counterValue = 0; // Counter value that can be updated later
   String? email;
   final _userInfo = Hive.box('userData');
   bool showText = true;
@@ -35,6 +35,28 @@ class _HomePageState extends State<HomePage> {
     southwest: const LatLng(59.5, 19.0),
     northeast: const LatLng(70.1, 32.0),
   );
+
+  void _incrementCounterValue() async {
+    setState(() {
+      counterValue++;
+    });
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDocRef =
+          FirebaseFirestore.instance.collection('Users').doc(user.uid);
+      await userDocRef.update({'points': counterValue});
+    }
+  }
+
+  void _updatePoints(int newPoints) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDocRef =
+          FirebaseFirestore.instance.collection('Users').doc(user.uid);
+      await userDocRef.update({'points': newPoints});
+    }
+  }
 
   void saveCarWashes(
     String name,
@@ -191,6 +213,8 @@ class _HomePageState extends State<HomePage> {
                       pricesController.text,
                       discountsController.text,
                     );
+                    _incrementCounterValue(); // Increment the counter when data is updated
+                    _updatePoints(counterValue);
 
                     // Show a success message to the user (you can customize this part)
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -290,6 +314,28 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _fetchCounterValue() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDocRef =
+          FirebaseFirestore.instance.collection('Users').doc(user.uid);
+      final userSnapshot = await userDocRef.get();
+      if (userSnapshot.exists) {
+        final userData = userSnapshot.data(); // Get the document data as a map
+        if (userData != null && userData.containsKey('points')) {
+          setState(() {
+            counterValue = userData['points'];
+          });
+        } else {
+          // If the 'points' field does not exist or is null, set the counterValue to 0
+          setState(() {
+            counterValue = 0;
+          });
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -299,6 +345,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _fetchCounterValue();
     requestLocationPermission(); // Request location permission when the app is launched
     email = FirebaseAuth.instance.currentUser?.email;
     print(FirebaseAuth.instance.currentUser?.email);
@@ -323,6 +370,37 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Where To Wash'),
         centerTitle: true,
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                onPressed: () {
+                  // Add functionality for the point icon here
+                },
+                icon: const Icon(Icons.shopify, size: 30),
+              ),
+              Positioned(
+                right: 5,
+                top: 5,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red, // Customize the background color
+                  ),
+                  child: Text(
+                    counterValue.toString(),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Customize the text color
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       drawer: Drawer(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,

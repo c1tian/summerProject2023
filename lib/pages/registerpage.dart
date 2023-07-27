@@ -19,7 +19,23 @@ class RegisterPageState extends State<RegisterPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController repassController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
+  int counterValue = 0; // Counter value that can be updated later
   final _formKey = GlobalKey<FormState>();
+
+  void _incrementCounterValue() {
+    setState(() {
+      counterValue++;
+    });
+  }
+
+  void _updatePoints(int newPoints) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDocRef =
+          FirebaseFirestore.instance.collection('Users').doc(user.uid);
+      await userDocRef.set({'points': newPoints}, SetOptions(merge: true));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -337,7 +353,8 @@ class RegisterPageState extends State<RegisterPage> {
                         ),
                         MaterialButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, route.loginPage);
+                            Navigator.pushReplacementNamed(
+                                context, route.loginPage);
                           },
                           color: Colors.orangeAccent[700],
                           minWidth: 200,
@@ -367,18 +384,22 @@ class RegisterPageState extends State<RegisterPage> {
       try {
         FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password)
-            .then((value) => {
-                  FirebaseFirestore.instance
-                      .collection('Users')
-                      .doc(value.user!.uid)
-                      .set({
-                    'fname': firstnameController.text,
-                    'lname': lastnameController.text,
-                    'email': emailController.text,
-                    'phone': numberController.text,
-                    'username': usernameController.text,
-                  })
-                });
+            .then((value) async {
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(value.user!.uid)
+              .set({
+            'fname': firstnameController.text,
+            'lname': lastnameController.text,
+            'email': emailController.text,
+            'phone': numberController.text,
+            'username': usernameController.text,
+            'points': 0, // Set the 'points' field to 0 for new users
+          });
+          // Increment the counter when a new user is registered and update points
+          _incrementCounterValue();
+          _updatePoints(counterValue);
+        });
         navigateToLoginPage();
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {

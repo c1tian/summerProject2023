@@ -197,13 +197,25 @@ class LoginPageState extends State<LoginPage> {
         _userInfo.put('uid', userCredential.user!.uid);
         navigateToHomePage();
       } on FirebaseAuthException catch (e) {
+        String errorMessage = '';
         if (e.code == 'user-not-found') {
-          print('No user found for that email.');
+          errorMessage = 'No user found for that email!';
         } else if (e.code == 'wrong-password') {
-          print('Wrong password provided for that user.');
+          errorMessage = 'Wrong password provided for that user!';
+        } else {
+          errorMessage = 'Wrong username or password!';
         }
+        showErrorMessage(errorMessage);
       }
     }
+  }
+
+  void showErrorMessage(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   void navigateToHomePage() {
