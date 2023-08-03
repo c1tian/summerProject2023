@@ -25,8 +25,7 @@ class _HomePageState extends State<HomePage> {
   final _userInfo = Hive.box('userData');
   bool showText = true;
   GoogleMapController? _mapController;
-  static const LatLng _center = LatLng(61.9241, 25.7482); // Center of Finland
-  static const double _zoom = 6.0; // Initial zoom level
+  LatLng _getLocation = const LatLng(61.5526, 25.4453); // Center of Finland
   final TextEditingController _searchController = TextEditingController();
   final Set<Marker> _markers = {};
   Set<Marker> _previousMarkers = {};
@@ -245,8 +244,15 @@ class _HomePageState extends State<HomePage> {
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      _getLocation = LatLng(position.latitude, position.longitude);
+
       final latitude = position.latitude;
       final longitude = position.longitude;
+
+      CameraPosition cameraPosition =
+          CameraPosition(target: _getLocation, zoom: 11);
+      _mapController
+          ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
       final userLocation = '$latitude,$longitude';
       _getCarWashes(userLocation);
@@ -264,7 +270,8 @@ class _HomePageState extends State<HomePage> {
       'autopesula+in+$location',
       'autopesu+in+$location',
     ];
-    final String url = '$baseUrl?query=$query&key=$apiKey';
+    final String url =
+        '$baseUrl?query=$query&key=$apiKey&location=$location'; // Include the user's location in the URL
 
     final response = await http.get(Uri.parse(url));
 
@@ -353,6 +360,7 @@ class _HomePageState extends State<HomePage> {
     if (showText) {
       startTimer();
     }
+    _getCurrentLocation();
   }
 
   void startTimer() {
@@ -436,11 +444,11 @@ class _HomePageState extends State<HomePage> {
         children: [
           GoogleMap(
             onMapCreated: _onMapCreated,
-            initialCameraPosition: const CameraPosition(
-              target: _center,
-              zoom: _zoom,
+            initialCameraPosition: CameraPosition(
+              target: _getLocation, // Use _getLocation here
+              zoom: 11,
             ),
-            myLocationButtonEnabled: true,
+            myLocationEnabled: true,
             mapType: MapType.normal,
             minMaxZoomPreference: const MinMaxZoomPreference(5.0, 20.0),
             markers: _markers,
@@ -486,7 +494,10 @@ class _HomePageState extends State<HomePage> {
                 if (showText) // Added condition to show the welcome text
                   Text(
                     'Welcome back, $email',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Colors.black),
                     textAlign: TextAlign.center,
                   ),
               ],
@@ -561,7 +572,7 @@ class _HomePageState extends State<HomePage> {
         _mapController?.animateCamera(
           CameraUpdate.newLatLngZoom(
             LatLng(lat, lng),
-            12.0,
+            11.0,
           ),
         );
 

@@ -28,7 +28,7 @@ class RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  void _updatePoints(int newPoints) async {
+  Future<void> _updatePoints(int newPoints) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userDocRef =
@@ -52,11 +52,11 @@ class RegisterPageState extends State<RegisterPage> {
                     fit: BoxFit.cover),
               ),
               child: Center(
-                  child: Container(
-                margin: const EdgeInsets.all(12),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
+                child: Container(
+                  margin: const EdgeInsets.all(12),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -70,308 +70,118 @@ class RegisterPageState extends State<RegisterPage> {
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildFormField(
                           controller: firstnameController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'First Name',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.only(
-                                left: 14, bottom: 8, top: 8, right: 14),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                          ),
+                          hintText: 'First Name',
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter your first name';
-                            } else {
-                              return null;
                             }
-                          },
-                          onSaved: (value) {
-                            firstnameController.text = value!;
+                            return null;
                           },
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildFormField(
                           controller: lastnameController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'Last name',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.only(
-                                left: 14, bottom: 8, top: 8, right: 14),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                          ),
+                          hintText: 'Last Name',
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter your last name';
-                            } else {
-                              return null;
                             }
-                          },
-                          onSaved: (value) {
-                            lastnameController.text = value!;
+                            return null;
                           },
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildFormField(
                           controller: emailController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'e-mail',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.only(
-                                left: 14, bottom: 8, top: 8, right: 14),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                          ),
+                          hintText: 'E-mail',
+                          keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter your E-Mail';
-                            } else {
-                              return null;
                             }
-                          },
-                          onSaved: (value) {
-                            emailController.text = value!;
+                            if (!value.contains('@')) {
+                              return 'Invalid email format';
+                            }
+                            return null;
                           },
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildFormField(
                           controller: numberController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'Phone number',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.only(
-                                left: 14, bottom: 8, top: 8, right: 14),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                          ),
+                          hintText: 'Phone number',
+                          keyboardType: TextInputType.phone,
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter your phone number';
-                            } else {
-                              return null;
                             }
-                          },
-                          onSaved: (value) {
-                            numberController.text = value!;
+                            return null;
                           },
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildPasswordField(
                           controller: passwordController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'Password',
-                            hintStyle: const TextStyle(color: Colors.grey),
-                            contentPadding: const EdgeInsets.only(
-                                left: 14, bottom: 8, top: 15, right: 14),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isObscure
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.black,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isObscure = !_isObscure;
-                                });
-                              },
-                            ),
-                          ),
+                          hintText: 'Password',
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter a new password';
-                            } else {
-                              return null;
                             }
+                            if (value.length < 6) {
+                              return 'Password should be at least 6 characters long';
+                            }
+                            return null;
                           },
-                          onSaved: (value) {
-                            passwordController.text = value!;
-                          },
-                          obscureText: _isObscure,
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildPasswordField(
                           controller: repassController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'Re-Enter Password',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.only(
-                                left: 14, bottom: 8, top: 8, right: 14),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                          ),
+                          hintText: 'Re-Enter Password',
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please re-enter your password';
-                            } else {
-                              return null;
                             }
+                            if (value != passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
                           },
-                          onSaved: (value) {
-                            repassController.text = value!;
-                          },
-                          obscureText: _isObscure,
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        TextFormField(
-                          style: const TextStyle(color: Colors.black),
+                        _buildFormField(
                           controller: usernameController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: 'Username',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.only(
-                                left: 14, bottom: 8, top: 8, right: 14),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                            ),
-                          ),
+                          hintText: 'Username',
                           validator: (value) {
                             if (value!.isEmpty) {
                               return 'Please enter a username';
-                            } else {
-                              return null;
                             }
-                          },
-                          onSaved: (value) {
-                            usernameController.text = value!;
+                            return null;
                           },
                         ),
                         const SizedBox(
                           height: 20,
                         ),
-                        MaterialButton(
-                          onPressed: () {
-                            register(
-                                emailController.text, passwordController.text);
-                          },
-                          color: Colors.orangeAccent[700],
-                          minWidth: 200,
-                          height: 50,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          child: const Text(
-                            'Register',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                        _buildSubmitButton(),
                         const SizedBox(
                           height: 20,
                         ),
-                        MaterialButton(
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(
-                                context, route.loginPage);
-                          },
-                          color: Colors.orangeAccent[700],
-                          minWidth: 200,
-                          height: 50,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          child: const Text(
-                            'Go back',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ]),
+                        _buildBackButton(),
+                      ],
+                    ),
+                  ),
                 ),
-              )),
+              ),
             )
           ],
         ),
@@ -379,16 +189,127 @@ class RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void register(String email, String password) async {
+  TextFormField _buildFormField({
+    required TextEditingController controller,
+    required String hintText,
+    TextInputType? keyboardType,
+    required String? Function(String?) validator,
+  }) {
+    return TextFormField(
+      style: const TextStyle(color: Colors.black),
+      controller: controller,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hintText,
+        hintStyle: const TextStyle(color: Colors.grey),
+        contentPadding: const EdgeInsets.only(
+            left: 14, bottom: 8, top: 8, right: 14),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+      ),
+      keyboardType: keyboardType,
+      validator: validator,
+    );
+  }
+
+  TextFormField _buildPasswordField({
+    required TextEditingController controller,
+    required String hintText,
+    required String? Function(String?) validator,
+  }) {
+    return TextFormField(
+      style: const TextStyle(color: Colors.black),
+      controller: controller,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hintText,
+        hintStyle: const TextStyle(color: Colors.grey),
+        contentPadding: const EdgeInsets.only(
+            left: 14, bottom: 8, top: 15, right: 14),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _isObscure ? Icons.visibility_off : Icons.visibility,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            setState(() {
+              _isObscure = !_isObscure;
+            });
+          },
+        ),
+      ),
+      validator: validator,
+      obscureText: _isObscure,
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return MaterialButton(
+      onPressed: () {
+        _register(
+          emailController.text,
+          passwordController.text,
+        );
+      },
+      color: Colors.orangeAccent[700],
+      minWidth: 200,
+      height: 50,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: const Text(
+        'Register',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackButton() {
+    return MaterialButton(
+      onPressed: () {
+        Navigator.pushReplacementNamed(context, route.loginPage);
+      },
+      color: Colors.orangeAccent[700],
+      minWidth: 200,
+      height: 50,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: const Text(
+        'Go back',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void _register(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
-        FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: email, password: password)
-            .then((value) async {
-          await FirebaseFirestore.instance
-              .collection('Users')
-              .doc(value.user!.uid)
-              .set({
+        final authResult = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+        final user = authResult.user;
+        if (user != null) {
+          await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
             'fname': firstnameController.text,
             'lname': lastnameController.text,
             'email': emailController.text,
@@ -398,22 +319,42 @@ class RegisterPageState extends State<RegisterPage> {
           });
           // Increment the counter when a new user is registered and update points
           _incrementCounterValue();
-          _updatePoints(counterValue);
-        });
-        navigateToLoginPage();
+          await _updatePoints(counterValue);
+          _navigateToLoginPage();
+        }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
-          print('The password provided is too weak.');
+          _showErrorDialog('The password provided is too weak.');
         } else if (e.code == 'email-already-in-use') {
-          print('The account already exists for that email.');
+          _showErrorDialog('The email address is already in use by another account.');
+        } else {
+          _showErrorDialog('An error occurred while registering. Please try again later.');
         }
       } catch (e) {
-        print(e);
+        _showErrorDialog('An error occurred while registering. Please try again later.');
       }
     }
   }
 
-  void navigateToLoginPage() {
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(errorMessage),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToLoginPage() {
     Navigator.pushReplacementNamed(context, route.loginPage);
   }
 }

@@ -13,7 +13,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _light = true;
-  bool _biometrics = false;
 
   final _switchPosition = Hive.box('userData');
 
@@ -25,12 +24,6 @@ class _SettingsPageState extends State<SettingsPage> {
         _light = _switchPosition.get('lightPosition');
       } else {
         _switchPosition.put('lightPosition', _light);
-      }
-
-      if (_switchPosition.containsKey('biometricsPosition')) {
-        _biometrics = _switchPosition.get('biometricsPosition');
-      } else {
-        _switchPosition.put('biometricsPosition', _biometrics);
       }
     });
   }
@@ -66,33 +59,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       _switchPosition.put('lightPosition', value);
                       setState(() {
                         _light = value;
-                      });
-                    }),
-              ],
-            ),
-            const Divider(
-              height: 20,
-              thickness: 1,
-            ),
-            const SizedBox(
-              height: 40,
-            ),
-            Row(
-              children: [
-                const Icon(
-                  Icons.fingerprint_rounded,
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Enable biometric login",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                Switch(
-                    value: _biometrics,
-                    onChanged: (bool value) async {
-                      _switchPosition.put('biometricsPosition', value);
-                      setState(() {
-                        _biometrics = value;
                       });
                     }),
               ],
