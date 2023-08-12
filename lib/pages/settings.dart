@@ -91,7 +91,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-
             const Divider(
               height: 20,
               thickness: 1,
@@ -138,12 +137,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void clearLocalData() {
-
     _switchPosition.clear();
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Data has been deleted successfully'),
-        backgroundColor: Colors.green,
-      ));
+      content: Text('Data has been deleted successfully'),
+      backgroundColor: Colors.green,
+    ));
   }
-
 }

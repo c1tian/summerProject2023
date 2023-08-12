@@ -34,7 +34,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
           FirebaseFirestore.instance.collection('Users').doc(user.uid);
       final userSnapshot = await userDocRef.get();
       if (userSnapshot.exists) {
-        final userData = userSnapshot.data(); // Get the document data as a map
+        final userData = userSnapshot.data();
         if (userData != null && userData.containsKey('points')) {
           setState(() {
             counterValue = userData['points'];
@@ -200,7 +200,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the AlertDialog
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
@@ -208,7 +208,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
               onPressed: () async {
                 bool success = await _savePassword(passwordController.text);
                 if (success) {
-                  Navigator.of(context).pop(); // Close the AlertDialog
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Password updated successfully'),
@@ -245,14 +245,14 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red, // Customize the background color
+                    color: Colors.red,
                   ),
                   child: Text(
                     counterValue.toString(),
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Customize the text color
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -319,7 +319,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         decoration: InputDecoration(
                           hintText: _nameController.text.isEmpty
                               ? 'Add/edit your name'
-                              : null, // Set hintText or text based on the condition
+                              : null,
                         ),
                       ),
                     ),
@@ -341,7 +341,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         decoration: InputDecoration(
                           hintText: _mobileController.text.isEmpty
                               ? 'Add/edit your mobile number'
-                              : null, // Set hintText or text based on the condition
+                              : null,
                         ),
                       ),
                     ),
@@ -385,7 +385,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         decoration: InputDecoration(
                           hintText: _addressController.text.isEmpty
                               ? 'Add/edit your address'
-                              : null, // Set hintText or text based on the condition
+                              : null,
                         ),
                       ),
                     ),
@@ -398,7 +398,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(
-                      mainAxisSize: MainAxisSize.min, // Minimize height
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.add_moderator_rounded),
                         Text('Password:'),

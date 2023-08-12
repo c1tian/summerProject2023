@@ -19,7 +19,7 @@ class RegisterPageState extends State<RegisterPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController repassController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
-  int counterValue = 0; // Counter value that can be updated later
+  int counterValue = 0;
   final _formKey = GlobalKey<FormState>();
 
   void _incrementCounterValue() {
@@ -203,8 +203,8 @@ class RegisterPageState extends State<RegisterPage> {
         fillColor: Colors.white,
         hintText: hintText,
         hintStyle: const TextStyle(color: Colors.grey),
-        contentPadding: const EdgeInsets.only(
-            left: 14, bottom: 8, top: 8, right: 14),
+        contentPadding:
+            const EdgeInsets.only(left: 14, bottom: 8, top: 8, right: 14),
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.white),
           borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -232,8 +232,8 @@ class RegisterPageState extends State<RegisterPage> {
         fillColor: Colors.white,
         hintText: hintText,
         hintStyle: const TextStyle(color: Colors.grey),
-        contentPadding: const EdgeInsets.only(
-            left: 14, bottom: 8, top: 15, right: 14),
+        contentPadding:
+            const EdgeInsets.only(left: 14, bottom: 8, top: 15, right: 14),
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.white),
           borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -309,7 +309,10 @@ class RegisterPageState extends State<RegisterPage> {
             .createUserWithEmailAndPassword(email: email, password: password);
         final user = authResult.user;
         if (user != null) {
-          await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(user.uid)
+              .set({
             'fname': firstnameController.text,
             'lname': lastnameController.text,
             'email': emailController.text,
@@ -326,12 +329,15 @@ class RegisterPageState extends State<RegisterPage> {
         if (e.code == 'weak-password') {
           _showErrorDialog('The password provided is too weak.');
         } else if (e.code == 'email-already-in-use') {
-          _showErrorDialog('The email address is already in use by another account.');
+          _showErrorDialog(
+              'The email address is already in use by another account.');
         } else {
-          _showErrorDialog('An error occurred while registering. Please try again later.');
+          _showErrorDialog(
+              'An error occurred while registering. Please try again later.');
         }
       } catch (e) {
-        _showErrorDialog('An error occurred while registering. Please try again later.');
+        _showErrorDialog(
+            'An error occurred while registering. Please try again later.');
       }
     }
   }

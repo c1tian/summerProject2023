@@ -35,6 +35,7 @@ class _HomePageState extends State<HomePage> {
     northeast: const LatLng(70.1, 32.0),
   );
 
+  // Method to increment the counter value and update it in to Firestore
   void _incrementCounterValue() async {
     setState(() {
       counterValue++;
@@ -48,6 +49,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Method to update user points in to Firestore
   void _updatePoints(int newPoints) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -57,6 +59,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Method to save car wash details to Firestore
   void saveCarWashes(
     String name,
     String details,
@@ -64,7 +67,7 @@ class _HomePageState extends State<HomePage> {
     String prices,
     String discounts,
   ) async {
-    // Concatenate the prices and discounts with commas
+    // Separate the prices and discounts with commas
     String formattedHours = openHours.split('\n').join(',');
     String formattedPrices = prices.split('\n').join(',');
     String formattedDiscounts = discounts.split('\n').join(',');
@@ -106,8 +109,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Method to display car wash details in a dialog
   void _showCarWashDetails(dynamic carWashData) async {
-    // Fetch the car wash data from Firestore using the 'name' parameter
     final carWashDocRef = FirebaseFirestore.instance
         .collection('CarWashes')
         .doc(carWashData['name']);
@@ -118,12 +121,10 @@ class _HomePageState extends State<HomePage> {
     TextEditingController pricesController = TextEditingController();
     TextEditingController discountsController = TextEditingController();
 
-    // Initialize the controllers with the existing values or empty strings
     pricesController.text = carWashFirestoreData?['Prices'] ?? '';
     discountsController.text = carWashFirestoreData?['Discounts'] ?? '';
     openHoursController.text = carWashFirestoreData?['OpenHours'] ?? '';
 
-    // Initialize the controllers with the existing values or empty strings
     openHoursController.text =
         carWashFirestoreData?['OpenHours']?.replaceAll(',', '\n') ?? '';
     pricesController.text =
@@ -140,7 +141,6 @@ class _HomePageState extends State<HomePage> {
             return AlertDialog(
               title: Text(carWashData['name']),
               content: SingleChildScrollView(
-                // Wrap the Column with SingleChildScrollView
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: openHoursController,
-                      maxLines: null, // Allow multiple lines of text
+                      maxLines: null,
                       decoration: const InputDecoration(
                         hintText:
                             'Enter opening hours here. Example:\nMA-PE 7-20\nLA-SU 10-18',
@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: pricesController,
-                      maxLines: null, // Allow multiple lines of text
+                      maxLines: null,
                       decoration: const InputDecoration(
                         hintText: 'Enter prices here. Example:\nHarjapesu 15e',
                       ),
@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: discountsController,
-                      maxLines: null, // Allow multiple lines of text
+                      maxLines: null,
                       decoration: const InputDecoration(
                         hintText:
                             'Enter discounts here. Example:\nDiscount A -5%',
@@ -235,6 +235,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Method to get the user's current location
   void _getCurrentLocation({String? location}) async {
     if (location != null) {
       // Fetch car washes at the specified location
@@ -259,19 +260,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Method to get car wash data from Google Places API
   void _getCarWashes(
     String location,
   ) async {
     const String baseUrl =
         'https://maps.googleapis.com/maps/api/place/textsearch/json';
-    const String apiKey = 'AIzaSyA76Y-B6E49EVTQak85ygZuEKESUTTu_ts';
+    const String apiKey =
+        'YOUR API KEY HERE!!!'; // Replace text with your API key
     List<String> query = [
       'car+washes+in+$location',
       'autopesula+in+$location',
       'autopesu+in+$location',
     ];
-    final String url =
-        '$baseUrl?query=$query&key=$apiKey&location=$location'; // Include the user's location in the URL
+    final String url = '$baseUrl?query=$query&key=$apiKey&location=$location';
 
     final response = await http.get(Uri.parse(url));
 
@@ -296,9 +298,9 @@ class _HomePageState extends State<HomePage> {
             saveCarWashes(
               result['name'],
               result['formatted_address'],
-              '', // Leave these empty so the user can add values later
-              '', // Leave these empty so the user can add values later
-              '', // Leave these empty so the user can add values later
+              '',
+              '',
+              '',
             );
           },
           markerId: MarkerId(result['place_id']),
@@ -321,6 +323,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Method to fetch and set the counter value from Firestore
   void _fetchCounterValue() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -363,6 +366,7 @@ class _HomePageState extends State<HomePage> {
     _getCurrentLocation();
   }
 
+  // Method to start a timer for showing a welcome message
   void startTimer() {
     Timer(const Duration(seconds: 15), () {
       setState(() {
@@ -382,9 +386,7 @@ class _HomePageState extends State<HomePage> {
           Stack(
             children: [
               IconButton(
-                onPressed: () {
-                  // Add functionality for the point icon here
-                },
+                onPressed: () {},
                 icon: const Icon(Icons.shopify, size: 30),
               ),
               Positioned(
@@ -394,14 +396,14 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red, // Customize the background color
+                    color: Colors.red,
                   ),
                   child: Text(
                     counterValue.toString(),
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Customize the text color
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -445,7 +447,7 @@ class _HomePageState extends State<HomePage> {
           GoogleMap(
             onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(
-              target: _getLocation, // Use _getLocation here
+              target: _getLocation,
               zoom: 11,
             ),
             myLocationEnabled: true,
@@ -491,7 +493,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                if (showText) // Added condition to show the welcome text
+                if (showText)
                   Text(
                     'Welcome back, $email',
                     style: Theme.of(context)
@@ -508,6 +510,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Method to handle the creation of GoogleMap widget
   void _onMapCreated(GoogleMapController controller) {
     setState(() {
       _mapController = controller; // Assign the controller to _mapController
@@ -521,19 +524,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Method to request location permission
   Future<void> requestLocationPermission() async {
     PermissionStatus permissionStatus =
         await Permission.locationWhenInUse.request();
 
     if (permissionStatus.isGranted) {
-      // Permission has been granted
-      _getCurrentLocation(); // Automatically locate the user
+      _getCurrentLocation();
     } else if (permissionStatus.isPermanentlyDenied) {
-      // Permission has been permanently denied
-      openAppSettings(); // Redirect to app settings to enable the permission manually
+      openAppSettings();
     }
   }
 
+  // Method to search for a place using geocoding
   void searchPlace(String query) async {
     if (query.trim().isEmpty || query == "null") {
       ScaffoldMessenger.of(context).showSnackBar(
