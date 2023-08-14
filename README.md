@@ -20,9 +20,9 @@
 
 
 ## About The Project
-![wtw_at_lp](https://github.com/c1tian/summerProject2023/assets/99178278/80102f83-2e07-4399-8d2e-ac3933414e32)
-![wtw_at_es](https://github.com/c1tian/summerProject2023/assets/99178278/cc86a335-63a5-449f-8b2c-501d69d3e460)
-![wtw_at_aip](https://github.com/c1tian/summerProject2023/assets/99178278/62e67ee4-2aa3-4449-a79f-ed10dfe78035)
+![wtw_at_lp](https://github.com/c1tian/summerProject2023/assets/99178278/a010353f-f4fd-4fc3-b45f-78902694cfe1)
+![wtw_at_es](https://github.com/c1tian/summerProject2023/assets/99178278/7739eeb5-1407-41e5-abad-a888645e467b)
+![wtw_at_aip](https://github.com/c1tian/summerProject2023/assets/99178278/bcac604d-f2fd-4a02-b9f4-2514794c37a4)
 
 
 
@@ -45,11 +45,15 @@ git clone https://github.com/c1tian/summerProject2023.git
 
 2. Register and create project to Firebase
 
-3. Download google-services.json from Firebase and place it under android/app in your project directory. 
-![instructions_wtw](https://github.com/c1tian/summerProject2023/assets/99178278/44ec624d-d066-4958-bce8-edf3dbec2675)
+
+ Download google-services.json from Firebase and place it under android/app in your project directory. 
+ ![instructions_wtw](https://github.com/c1tian/summerProject2023/assets/99178278/e717fd8e-4772-4396-af30-1fa8d7736af0)
+
+
 
 4. Get your own API key and use it as picture shows below
-![instructions2_wtw](https://github.com/c1tian/summerProject2023/assets/99178278/0a3dbde9-054e-4327-923e-e277873e06ca)
+![instructions2_wtw](https://github.com/c1tian/summerProject2023/assets/99178278/778c6740-c639-411e-a0b4-49bab2090463)
+
 
 
 
